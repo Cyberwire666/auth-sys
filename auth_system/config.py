@@ -7,4 +7,4 @@ class Config:
 
     # GitHub OAuth keys (set up in GitHub)
     GITHUB_CLIENT_ID = "Ov23liA2DNQPFLuHfZWF"
-    GITHUB_CLIENT_SECRET = "94285a6f5f8d69ae3b38db669089f57c36677a7bT"
+    GITHUB_CLIENT_SECRET = "7f139ea1186f791bc9214c70296ae59f12193a81"
