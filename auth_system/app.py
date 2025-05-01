@@ -19,6 +19,7 @@ github_bp = make_github_blueprint(
     client_id=Config.GITHUB_CLIENT_ID,
     client_secret=Config.GITHUB_CLIENT_SECRET,
     scope="user:email",
+    redirect_url='http://127.0.0.1:5000/github/authorized',  # Correct redirect URI
 )
 app.register_blueprint(github_bp, url_prefix="/github")
 
@@ -47,17 +48,6 @@ def index():
 @login_required
 def home():
     return render_template('home.html', name=current_user.username)
-
-# Optional: GitHub Login route
-@app.route('/github_login')
-def github_login():
-    if not github.authorized:
-        return redirect(url_for("github.login"))
-    resp = github.get("/user")
-    assert resp.ok, resp.text
-    github_info = resp.json()
-    # You can create/find the user in your DB here if needed
-    return f"Hello, {github_info['login']}!"
 
 if __name__ == "__main__":
     with app.app_context():

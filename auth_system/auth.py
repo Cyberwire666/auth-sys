@@ -105,6 +105,48 @@ def github_login():
     flash(f'Logged in as {github_username} via GitHub!', 'success')
     return redirect(url_for('home'))
 
+# Route for GitHub OAuth callback
+@auth_bp.route('/github/authorized')
+def github_authorized():
+    if not github.authorized:
+        flash("GitHub login failed.", 'danger')
+        return redirect(url_for('auth.login'))
+
+    resp = github.get('/user')
+    if not resp.ok:
+        flash("Failed to fetch user info from GitHub.", 'danger')
+        return redirect(url_for('auth.login'))
+
+    github_info = resp.json()
+    github_id = str(github_info['id'])
+    github_username = github_info['login']
+    github_email = github_info.get('email')
+
+    # Handle the case where email is not public on GitHub
+    if not github_email:
+        emails_resp = github.get("/user/emails")
+        if emails_resp.ok:
+            github_email = emails_resp.json()[0]['email']
+
+    # Check if user exists in the database
+    user = User.query.filter_by(github_id=github_id).first()
+
+    if not user:
+        user = User(
+            username=github_username,
+            email=github_email or f"{github_username}@github.com",
+            password_hash=bcrypt.hashpw(b'github_dummy_password', bcrypt.gensalt()),
+            github_id=github_id,
+            auth_method='github'
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    login_user(user, remember=True)
+    record_login(user.id, request.remote_addr)
+    flash(f'Logged in as {github_username} via GitHub!', 'success')
+    return redirect(url_for('home'))
+
 # Helper functions
 def validate_password(password):
     return (len(password) >= 8 and
