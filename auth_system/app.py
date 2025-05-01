@@ -19,10 +19,9 @@ github_bp = make_github_blueprint(
     client_id=Config.GITHUB_CLIENT_ID,
     client_secret=Config.GITHUB_CLIENT_SECRET,
     scope="user:email",
-    redirect_url='http://127.0.0.1:5000/github/authorized',  # Correct redirect URI
+    redirect_to='auth.github_login'  # Let Flask-Dance handle the URL
 )
-app.register_blueprint(github_bp, url_prefix="/github")
-
+app.register_blueprint(github_bp, url_prefix="/login")  # Changed to /login
 # Register your auth blueprint
 app.register_blueprint(auth_bp)
 
